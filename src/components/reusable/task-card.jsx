@@ -1,34 +1,26 @@
 import React from "react";
-import { StyleSheet, Text, TouchableOpacity } from "react-native";
-import {useNavigation} from "@react-navigation/native";
+import { Text, TouchableOpacity } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { styles } from "../../styles/styles";
 
 const TaskCard = ({ task }) => {
   const navigator = useNavigation();
   return (
     <TouchableOpacity
       style={styles.task}
-      // onPress={() => navigator.navigate("task-details", task)}
+      onPress={() => navigator.navigate("task-details", task)}
     >
-      <Text style={styles.text}>{task.title}</Text>
+      <Text
+        style={{
+          fontSize: "20px",
+          textAlign: "center",
+          color: task.completed ? "green" : "white",
+        }}
+      >
+        {task.title}
+      </Text>
     </TouchableOpacity>
   );
-  //   return <Text styles={styles.text}>{title}</Text>;
 };
 
 export default TaskCard;
-
-const styles = StyleSheet.create({
-  task: {
-    padding: 10,
-    margin: 5,
-    backgroundColor: "grey",
-    borderRadius: 20,
-    width: "90%",
-    alignItems: "center",
-  },
-  text: {
-    fontSize: 20,
-    textAlign: "center",
-    color: "lightblue",
-  },
-});

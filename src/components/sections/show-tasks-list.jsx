@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, View } from "react-native";
+import { View } from "react-native";
 import TaskCard from "../reusable/task-card";
 import { useNavigation } from "@react-navigation/native";
 
@@ -15,10 +15,7 @@ const ShowTasksList = ({ tasksList }) => {
       }}
     >
       {tasksList.map((item, index) => (
-        <TaskCard
-          key={`task-${index}`}
-          task={item}
-        />
+        <TaskCard key={`task-${index}`} task={item} />
       ))}
     </View>
   );

@@ -1,87 +1,81 @@
-import React, { useState } from "react";
-import {  StyleSheet, Text,  View } from "react-native";
+import React, { useEffect, useState } from "react";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 import ShowTasksList from "../components/sections/show-tasks-list";
 import AddTaskObject from "../components/sections/add-task-object";
+import { useDispatch, useSelector } from "react-redux";
+import { addTask, setTasksList } from "../redux/reducers/task-slice";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { styles } from "../styles/styles";
 
 const TasksHome = () => {
-  let [tasksList, setTasksList] = useState([]);
+  let tasksList = useSelector((state) => state.task.tasksList);
+  console.log(tasksList, "new tasks");
+
+  let dispatchAction = useDispatch();
+
+  async function setDataToStorage(key, data) {
+    await AsyncStorage.setItem(key, JSON.stringify(data));
+  }
+  async function getDataFromStorage(key) {
+    return JSON.parse(await AsyncStorage.getItem(key));
+  }
+
+  useEffect(() => {
+    console.log(tasksList, "tasks list");
+
+    if (tasksList.length == 0) {
+      console.log("empty");
+
+      getDataFromStorage("tasksList").then((data) => {
+        console.log(data, "data from storage");
+        if (data != null) {
+          dispatchAction(setTasksList(data));
+        }
+      });
+      console.log(tasksList, "list after get");
+    } else {
+      setDataToStorage("tasksList", tasksList);
+    }
+  }, [tasksList]);
+
   let [taskObject, setTaskObjectData] = useState({
+    id: 0,
     title: "",
     description: "",
+    completed: false,
   });
 
   function onChangeTaskTitle(title) {
     setTaskObjectData({ ...taskObject, title });
-    console.log(taskObject);
   }
 
   function onChangeTaskDescription(description) {
     setTaskObjectData({ ...taskObject, description });
-    console.log(taskObject);
   }
 
-  function addTask() {
-    let found = tasksList.find(({ title }) => title == taskObject.title);
-    console.log(found, "foun");
-    if (!taskObject.title == "" && found == undefined) {
-      setTasksList([...tasksList, taskObject]);
-    }
-
-    console.log(tasksList);
+  function onTaskAdd() {
+    console.log("button pressed");
+    dispatchAction(
+      addTask({
+        ...taskObject,
+        id: new Date().getTime(),
+      })
+    );
   }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>To Do App</Text>
-      <AddTaskObject
-        addTask={addTask}
-        onChangeTaskTitle={onChangeTaskTitle}
-        onChangeTaskDescription={onChangeTaskDescription}
-      />
-      <ShowTasksList tasksList={tasksList} />
+      <ScrollView style={{ width: "100%" }}>
+        <Text style={styles.text}>{"To Do App"}</Text>
+        <AddTaskObject
+          onTaskAdd={onTaskAdd}
+          onChangeTaskTitle={onChangeTaskTitle}
+          onChangeTaskDescription={onChangeTaskDescription}
+        />
+        <ShowTasksList tasksList={tasksList} />
+      </ScrollView>
     </View>
   );
 };
 
 export default TasksHome;
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "dark",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  input: {
-    borderRadius: 5,
-    borderColor: "grey",
-    borderWidth: 2,
-    padding: 10,
-    margin: 5,
-    textAlign: "center",
-    width: "85%",
-    color: "white",
-  },
-  text: {
-    padding: 10,
-    margin: 10,
-    marginBottom: 30,
-    fontSize: 40,
-    color: "lightblue",
-  },
-  button: {
-    fontSize: 25,
-    backgroundColor: "lightblue",
-    paddingVertical: 7,
-    paddingHorizontal: 30,
-    marginTop: 20,
-    borderRadius: 7,
-  },
-  task: {
-    padding: 10,
-    //   margin: 10,
-    //   marginBottom: 30,
-    fontSize: 20,
-    color: "white",
-    backgroundColor: "grey",
-  },
-});
